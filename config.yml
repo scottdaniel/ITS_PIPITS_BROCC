@@ -1,0 +1,4 @@
+all:
+  project_dir: "/scr1/users/tuv/JungJin_projects/switching_ITS_to_snakemake/ITS_PIPITS_BROCC"
+  demux_dir: "demux_files"
+

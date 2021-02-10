@@ -1,0 +1,3 @@
+conda create -n ITS_PIPITS_BROCC --channel bioconda --channel conda-forge --channel defaults python=3.6
+conda install --name ITS_PIPITS_BROCC --file requirements.txt
+/anaconda/envs/venv_name/bin/pip install brocc

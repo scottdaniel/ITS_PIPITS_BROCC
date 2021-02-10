@@ -1,0 +1,16 @@
+rule all_PIPITS:
+  input:
+   TARGET_PIPITS
+
+rule createreadpairslist:
+  input:
+    PROJECT_DIR + "/" + config["all"]["demux_dir"]
+  params:
+    PIPITS_DIR
+  output:
+    PIPITS_DIR + "/readpairslist.txt"
+  shell:
+    """
+    mkdir -p {params} && \
+    pispino_createreadpairslist -i {input} -o {output}
+    """

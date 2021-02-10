@@ -1,0 +1,5 @@
+TARGET_PIPITS = [str(PIPITS_DIR + "/readpairslist.txt")]
+
+TARGET_ALL = (
+  TARGET_PIPITS
+)
