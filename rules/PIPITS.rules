@@ -2,6 +2,15 @@ rule all_PIPITS:
   input:
    TARGET_PIPITS
 
+rule check_fastq:
+  input: 
+    DEMUX_DIR + "/{sample}_{direction}.fastq.gz"
+  output:
+    DEMUX_DIR
+  shell:
+    """
+    touch {output}
+    """
 rule createreadpairslist:
   input:
     DEMUX_DIR
