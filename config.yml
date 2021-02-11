@@ -1,10 +1,11 @@
 all:
-  project_dir: "path/to/project_dir"
+  project_dir: "/path/to/project_dir"
   ncbi_db: "/mnt/isilon/microbiome/analysis/biodata/blast/nt_20180816/nt"
   mux_dir: "multiplexed_fastq"
   demux_dir: "demultiplexed_fastq"
   threads: 4
-  ITS_subregion: ITS1 
+  ITS_subregion: ITS1
+  mapping_file: "test_mapping_file.tsv"
 
 demux:
     mismatch: 0
