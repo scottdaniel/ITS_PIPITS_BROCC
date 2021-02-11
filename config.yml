@@ -1,5 +1,5 @@
 all:
-  project_dir: "path/to/project_dir"
+  project_dir: "/scr1/users/danielsg/ITS_PIPITS_BROCC"
   ncbi_db: "/mnt/isilon/microbiome/analysis/biodata/blast/nt_20180816/nt"
   mux_dir: "multiplexed_fastq"
   demux_dir: "demultiplexed_fastq"
