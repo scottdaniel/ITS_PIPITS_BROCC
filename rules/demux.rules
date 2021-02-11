@@ -5,14 +5,13 @@ rule all_demux:
 rule gzip_demux:
     input:
         DEMUX_DIR + "/{sample}_{direction}.fastq"
-    params:
-        demux_gz_dir = DEMUX_DIR
     output:
-        DEMUX_DIR + "/{sample}_{direction}.fastq.gz"
+        files = DEMUX_DIR + "/{sample}_{direction}.fastq.gz",
+        demux_dir = DEMUX_DIR
     shell:
         """
-        mkdir -p {params.demux_gz_dir}
-        gzip -c {input} > {output}
+        mkdir -p {output.demux_dir}
+        gzip -c {input} > {output.file}
         """
 
 rule run_dnabc:

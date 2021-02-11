@@ -4,7 +4,8 @@ rule all_PIPITS:
 
 rule createreadpairslist:
   input:
-    DEMUX_DIR
+    files = DEMUX_DIR + "/{sample}_{direction}.fastq.gz",
+    demux_dir = DEMUX_DIR
   params:
     PIPITS_DIR
   output:
@@ -12,7 +13,7 @@ rule createreadpairslist:
   shell:
     """
     mkdir -p {params} && \
-    pispino_createreadpairslist -i {input} -o {output}
+    pispino_createreadpairslist -i {input.demux_dir} -o {output}
     """
 
 rule seqprep:
