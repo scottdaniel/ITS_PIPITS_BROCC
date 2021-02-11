@@ -7,8 +7,8 @@ PROJECT_DIR = config["all"]["project_dir"]
 DEMUX_DIR = PROJECT_DIR + "/" + config["all"]["demux_dir"]
 PIPITS_DIR = PROJECT_DIR + "/PIPITS_output"
 BL_BR_DIR = PROJECT_DIR + "/BLAST_BROCC_output"
-SAMPLE_IDS = util_functions.get_sample(MAPPING_FP)
 MAPPING_FP = PROJECT_DIR + "/" + config["all"]["mapping_file"]
+SAMPLE_IDS = util_functions.get_sample(MAPPING_FP)
 
 include: "rules/targets.rules"
 include: "rules/PIPITS.rules"

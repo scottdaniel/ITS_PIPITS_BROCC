@@ -6,7 +6,7 @@ all:
   demux_dir: "demultiplexed_fastq"
   threads: 4
   ITS_subregion: ITS1
-  mapping_file: "test_mapping_file.tsv"
+  mapping_file: "davis_run_2_ITS_mapping_file.tsv"
 
 demux:
     mismatch: 0
