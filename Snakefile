@@ -2,6 +2,7 @@ import configparser
 import yaml
 
 PROJECT_DIR = config["all"]["project_dir"]
+DEMUX_DIR = config["all"]["demux_dir"]
 PIPITS_DIR = PROJECT_DIR + "/PIPITS_output"
 BL_BR_DIR = PROJECT_DIR + "/BLAST_BROCC_output"
 

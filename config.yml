@@ -1,6 +1,6 @@
 all:
   project_dir: "/scr1/users/tuv/JungJin_projects/switching_ITS_to_snakemake/ITS_PIPITS_BROCC"
   ncbi_db: "/mnt/isilon/microbiome/analysis/biodata/blast/nt_20180816/nt"
-  demux_dir: "demux_files"
+  demux_dir: "/path/to/demux_files"
   threads: 4
   ITS_subregion: ITS1 

@@ -4,7 +4,7 @@ rule all_PIPITS:
 
 rule createreadpairslist:
   input:
-    PROJECT_DIR + "/" + config["all"]["demux_dir"]
+    DEMUX_DIR
   params:
     PIPITS_DIR
   output:
@@ -17,7 +17,7 @@ rule createreadpairslist:
 
 rule seqprep:
   input:
-    prj_dir = PROJECT_DIR + "/" + config["all"]["demux_dir"],
+    dmx_dir = DEMUX_DIR,
     rp_list = PIPITS_DIR + "/readpairslist.txt"
   params:
     PIPITS_DIR + "/out_seqprep"
@@ -28,7 +28,7 @@ rule seqprep:
   shell:
     """
     mkdir -p {params} && \
-    pispino_seqprep -i {input.prj_dir} -o {params} -l {input.rp_list} -t {threads}
+    pispino_seqprep -i {input.dmx_dir} -o {params} -l {input.rp_list} -t {threads}
     """
 
 rule funits:
