@@ -1,0 +1,34 @@
+rule all_BLAST_BROCC:
+  input:
+   TARGET_BL_BR
+
+rule blastn:
+  input:
+    PIPITS_DIR + "/out_process/repseqs.fasta"
+  params:
+    bl_br_dir = BL_BR_DIR,
+    blast_results = BL_BR_DIR + "/out_blast",
+    blast_db = config["all"]["ncbi_db"]
+  threads:
+    config["all"]["threads"]
+  output:
+    BL_BR_DIR + "/out_blast/repseqs.fasta.blastout"
+  shell:
+    """
+    mkdir -p {params.bl_br_dir} && \
+    mkdir -p {params.blast_results} && \
+    blastn -query {input} -evalue 1e-5 -outfmt 7 -db {params.blast_db} -out {output} -num_threads {threads} -max_target_seqs 100
+    """
+
+rule brocc:
+  input:
+    pipits = PIPITS_DIR + "/out_process/repseqs.fasta",
+    blast = BL_BR_DIR + "/out_blast/repseqs.fasta.blastout"
+  params:
+    BL_BR_DIR + "/out_brocc"
+  output:
+    BL_BR_DIR + "/out_brocc/brocc.log"
+  shell:
+    """
+    brocc.py -i {input.pipits} -b {input.blast} -o {params} --min_species_id 95.2 --min_genus_id 83.05
+    """
