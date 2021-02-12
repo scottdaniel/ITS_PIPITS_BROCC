@@ -10,4 +10,4 @@ all:
 
 demux:
     mismatch: 0
-    revcomp: false
+    revcomp: true

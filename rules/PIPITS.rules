@@ -13,7 +13,7 @@ rule createreadpairslist:
   shell:
     """
     mkdir -p {params} && \
-    pispino_createreadpairslist -i {input} -o {output.rp_list}
+    pispino_createreadpairslist -i {output.dmx_dir} -o {output.rp_list}
     """
 
 rule seqprep:

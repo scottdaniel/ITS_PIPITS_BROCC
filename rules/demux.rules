@@ -13,6 +13,7 @@ rule gzip_demux:
         """
         mkdir -p {params}
         gzip -c {input} > {output}
+        rm {input}
         """
 
 rule run_dnabc:
