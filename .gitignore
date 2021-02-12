@@ -11,3 +11,4 @@ pipits_db/
 total_read_counts.tsv
 PIPITS_output/
 logs
+BLAST_BROCC_output/
