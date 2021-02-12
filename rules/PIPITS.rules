@@ -4,16 +4,15 @@ rule all_PIPITS:
 
 rule createreadpairslist:
   input:
-    rules.gzip_demux.output
+    DEMUX_DIR
   params:
-    demux_dir = DEMUX_DIR,
-    pipits_dir = PIPITS_DIR
+    PIPITS_DIR
   output:
     PIPITS_DIR + "/readpairslist.txt"
   shell:
     """
-    mkdir -p {params.pipits_dir} && \
-    pispino_createreadpairslist -i {params.demux_dir} -o {output}
+    mkdir -p {params} && \
+    pispino_createreadpairslist -i {input} -o {output}
     """
 
 rule seqprep:
