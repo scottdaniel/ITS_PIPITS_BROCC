@@ -6,22 +6,22 @@ rule createreadpairslist:
   input:
     expand(DEMUX_DIR + "/{sample}_{direction}.fastq.gz", sample = SAMPLE_IDS, direction = ["R1", "R2"])
   params:
-    PIPITS_DIR
-  output:
     dmx_dir = DEMUX_DIR,
-    rp_list = PIPITS_DIR + "/readpairslist.txt"
+    pipits_dir = PIPITS_DIR
+  output:
+    PIPITS_DIR + "/readpairslist.txt"
   shell:
     """
-    mkdir -p {params} && \
-    pispino_createreadpairslist -i {output.dmx_dir} -o {output.rp_list}
+    mkdir -p {params.pipits_dir} && \
+    pispino_createreadpairslist -i {params.dmx_dir} -o {output}
     """
 
 rule seqprep:
   input:
-    dmx_dir = DEMUX_DIR,
-    rp_list = PIPITS_DIR + "/readpairslist.txt"
+    PIPITS_DIR + "/readpairslist.txt"
   params:
-    PIPITS_DIR + "/out_seqprep"
+    dmx_dir = DEMUX_DIR,
+    out_seqprep = PIPITS_DIR + "/out_seqprep"
   threads:
     config["all"]["threads"]
   output:
@@ -29,7 +29,7 @@ rule seqprep:
   shell:
     """
     mkdir -p {params} && \
-    pispino_seqprep -i {input.dmx_dir} -o {params} -l {input.rp_list} -t {threads}
+    pispino_seqprep -i {params.dmx_dir} -o {params.out_seqprep} -l {input} -t {threads}
     """
 
 rule funits:
