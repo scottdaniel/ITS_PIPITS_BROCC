@@ -2,27 +2,18 @@ rule all_PIPITS:
   input:
    TARGET_PIPITS
 
-rule check_files:
-  input:
-    expand(DEMUX_DIR + "/{sample}_{direction}.fastq.gz", sample = SAMPLE_IDS, direction = ["R1", "R2"])
-  output:
-    touch(str(config["all"]["demux_dir"]) + '/files.checked')
-  shell:
-    """
-    touch $DEMUX_DIR/files.checked
-    """
-
 rule createreadpairslist:
   input:
-    rules.check_files.output
+    expand(DEMUX_DIR + "/{sample}_{direction}.fastq.gz", sample = SAMPLE_IDS, direction = ["R1", "R2"])
   params:
     PIPITS_DIR
   output:
-    PIPITS_DIR + "/readpairslist.txt"
+    dmx_dir = DEMUX_DIR,
+    rp_list = PIPITS_DIR + "/readpairslist.txt"
   shell:
     """
     mkdir -p {params} && \
-    pispino_createreadpairslist -i {input} -o {output}
+    pispino_createreadpairslist -i {input} -o {output.rp_list}
     """
 
 rule seqprep:

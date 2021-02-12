@@ -6,12 +6,12 @@ rule gzip_demux:
     input:
         DEMUX_DIR + "/{sample}_{direction}.fastq"
     params:
-        demux_gz_dir = DEMUX_DIR
+        DEMUX_DIR
     output:
         DEMUX_DIR + "/{sample}_{direction}.fastq.gz"
     shell:
         """
-        mkdir -p {params.demux_gz_dir}
+        mkdir -p {params}
         gzip -c {input} > {output}
         """
 
