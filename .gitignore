@@ -1,1 +1,6 @@
 demux_files/*
+.snakemake/*
+multiplexed_fastq/*
+davis_run_2_ITS_mapping_file.tsv
+scripts/__pycache__/__init__.cpython-36.pyc
+scripts/__pycache__/util_functions.cpython-36.pyc
