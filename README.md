@@ -15,6 +15,16 @@ conda install --name ITS_PIPITS_BROCC --file requirements.txt
 /anaconda/envs/venv_name/bin/pip install brocc #brocc needs to be installed through your environment's pip
 ```
 
+- The following software also need to be installed:
+  - `dnabc` (https://github.com/PennChopMicrobiomeProgram/dnabc)
+  - To install:
+  ```bash
+  git clone https://github.com/PennChopMicrobiomeProgram/dnabc
+  cd dnabc
+  conda activate ITS_PIPITS_BROCC
+  pip install -e ./
+  ```
+
 ## Required input files for the pipeline
 To run the pipeline, we need
 - Demultiplexed R1/R2 read pairs (either \*.fasta or \*.fasta.gz)
