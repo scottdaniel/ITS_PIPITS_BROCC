@@ -1,3 +1,4 @@
 pipits
 snakemake
 blast
+pandas

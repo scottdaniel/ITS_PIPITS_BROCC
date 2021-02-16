@@ -1,12 +1,14 @@
 all:
-  project_dir: "/scr1/users/danielsg/ITS_PIPITS_BROCC"
+  project_dir: "/scr1/users/tuv/JungJin_projects/switching_ITS_to_snakemake/git_discard_fork/ITS_PIPITS_BROCC"
+#  project_dir: "/scr1/users/danielsg/ITS_PIPITS_BROCC"
 #  project_dir: "/path/to/project_dir"
   ncbi_db: "/mnt/isilon/microbiome/analysis/biodata/blast/nt_20180816/nt"
   mux_dir: "multiplexed_fastq"
   demux_dir: "demultiplexed_fastq"
   threads: 4
-  ITS_subregion: ITS1
-  mapping_file: "davis_run_2_ITS_mapping_file.tsv"
+  ITS_subregion:
+  mapping_file: "Igoucheva_Vitali_Run1_mapping_file-Metadata_ITS.tsv"
+#  mapping_file: "davis_run_2_ITS_mapping_file.tsv"
 
 demux:
     mismatch: 0

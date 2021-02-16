@@ -1,6 +1,7 @@
 demux_files/*
 .snakemake/*
 multiplexed_fastq/*
+Igoucheva_Vitali_Run1_mapping_file-Metadata_ITS.tsv
 davis_run_2_ITS_mapping_file.tsv
 scripts/__pycache__/__init__.cpython-36.pyc
 scripts/__pycache__/util_functions.cpython-36.pyc
@@ -12,3 +13,5 @@ total_read_counts.tsv
 PIPITS_output/
 logs
 BLAST_BROCC_output/
+transferAll.sh
+transferOne.sh

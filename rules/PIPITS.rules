@@ -50,7 +50,7 @@ rule funits:
 
 rule process:
   input:
-    PIPITS_DIR + "/out_funits/ITS.fasta"
+    PIPITS_DIR + "/out_funits/ITS.fasta" if config["all"]["ITS_subregion"] else PIPITS_DIR + "/out_seqprep/prepped.fasta"
   params:
     PIPITS_DIR + "/out_process"
   threads:

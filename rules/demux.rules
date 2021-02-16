@@ -18,8 +18,8 @@ rule gzip_demux:
 
 rule run_dnabc:
     input:
-        R1 = config["all"]["mux_dir"] + "/Undetermined_S0_L001_R1_001.fastq.gz",
-        R2 = config["all"]["mux_dir"] + "/Undetermined_S0_L001_R2_001.fastq.gz"
+        R1 = config["all"]["mux_dir"] + "/Undetermined_S0_L001_R1_001_trimmed.fastq.gz",
+        R2 = config["all"]["mux_dir"] + "/Undetermined_S0_L001_R2_001_trimmed.fastq.gz"
     params:
         demux_dir = DEMUX_DIR,
         mismatch = config["demux"]["mismatch"],
@@ -53,3 +53,42 @@ rule run_dnabc:
             {MAPPING_FP} {input.R1} {input.R2}
             """)
 
+rule gzip_trimmed:
+  input:
+    expand(config["all"]["mux_dir"] + "/Undetermined_S0_L001_{direction}_001_trimmed.fastq", direction = ["R1", "R2"])
+  output:
+    config["all"]["mux_dir"] + "/Undetermined_S0_L001_{direction}_001_trimmed.fastq.gz"
+  params:
+    gunz = config["all"]["mux_dir"] + "/Undetermined_S0_L001_{direction}_001_trimmed.fastq",
+    gz = config["all"]["mux_dir"] + "/Undetermined_S0_L001_{direction}_001_trimmed.fastq.gz"
+  shell:
+    """
+    gzip -c {params.gunz} > {params.gz} && \
+    rm {params.gunz}
+    """
+
+rule trim_primers:
+  input:
+    expand(config["all"]["mux_dir"] + "/Undetermined_S0_L001_{index}_001.fastq", index = ["R1", "R2", "I1", "I2"])
+  output:
+    expand(config["all"]["mux_dir"] + "/Undetermined_S0_L001_{index_3}_001_trimmed.fastq", index_3 = ["R1", "R2", "I1"])
+  params:
+    config["all"]["mux_dir"]
+  shell:
+    """
+    python scripts/discard_bad_reads.py --dir {params}
+    """
+
+rule gunzip_untrimmed:
+  input:
+    expand(config["all"]["mux_dir"] + "/Undetermined_S0_L001_{index}_001.fastq.gz", index = ["R1", "R2", "I1", "I2"])
+  params:
+    gz = config["all"]["mux_dir"] + "/Undetermined_S0_L001_{index}_001.fastq.gz",
+    gunz = config["all"]["mux_dir"] + "/Undetermined_S0_L001_{index}_001.fastq"
+  output:
+    config["all"]["mux_dir"] + "/Undetermined_S0_L001_{index}_001.fastq"
+  shell:
+    """
+    gunzip -c {params.gz} > {params.gunz} && \
+    rm {params.gz}
+    """
