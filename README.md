@@ -37,7 +37,7 @@ To run the pipeline, we need
   - **all: ncbi_db**: path to a local ncbi nt database, e.g. `"/path/to/nt"`
   - **all: demux_dir**: the directory containing demultiplexed R1/R2 read pairs, which does not have to be in the project directory, e.g. `"/path/to/demux_files"` 
   - **all: threads**: number of threads to use
-  - **all: ITS_subregion**: `ITS1` or `ITS2`
+  - **all: ITS_subregion**: can leave blank or one of `ITS1` or `ITS2` for ITS subregion extraction
 - To run the pipeline, activate the environment by entering `conda activate ITS_PIPITS_BROCC`, `cd` into the project directory and execute:
 ```bash
 snakemake \

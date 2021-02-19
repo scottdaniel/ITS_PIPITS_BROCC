@@ -1,6 +1,6 @@
 rule all_BLAST_BROCC:
   input:
-   TARGET_BL_BR
+    TARGET_BL_BR
 
 rule blastn:
   input:
