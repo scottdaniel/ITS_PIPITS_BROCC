@@ -13,3 +13,8 @@ all:
 demux:
     mismatch: 0
     revcomp: true
+
+trim:
+  f_primer: CTTGGTCATTTAGAGGAAGTAA
+  r_primer: GCTGCGTTCTTCATCGATGC
+  mismatch: 2
