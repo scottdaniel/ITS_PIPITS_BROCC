@@ -61,7 +61,7 @@ snakemake \
 
 ## Rules
 ### Demultiplexing
-Input: Multiplexed Illumina sequencing files
+Input: Multiplexed Illumina sequencing files  
 Output: manifest.csv, total_read_counts.tsv, demultiplexed fastq files
 ### Trimming
 #### Primer trim
