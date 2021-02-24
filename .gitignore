@@ -4,6 +4,7 @@
 pipits_db/
 demux_files/
 logs/
+reads/
 scripts/__pycache__/
 .snakemake/
 snakejob*
@@ -11,4 +12,3 @@ transfer*
 *.tsv
 *.swp
 manifest.csv
-reads.log

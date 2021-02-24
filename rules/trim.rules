@@ -1,6 +1,6 @@
 rule all_trim:
     input:
-        TARGET_TRIM
+        TARGET_TRIM + TARGET_REPORT
 
 def rev_comp(dna):
     complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'}
@@ -12,13 +12,13 @@ rule trim_r1:
     params:
         mismatch = config["trim"]["mismatch"],
         rev = rev_comp(config["trim"]["r_primer"]),
-        read_log = READ_LOG
+        read_fp = READ_DIR + "/{sample}_R1.fastq"
     output:
         trim_fp = PRIMER_TRIM_FP + "/{sample}_R1_trimmed.fastq",
         log_fp = PRIMER_TRIM_FP + "/{sample}_R1_trimmed.log"
     shell:
         """
-        wc -l {input} | awk '{{x=$1/4; print x"\t"$2}}' >> {params.read_log}
+        wc -l {input} | awk '{{x=$1/4; print x"\t"$2}}' > {params.read_fp}
         remove_primers.py {params.rev} \
           -i {input} \
           -o {output.trim_fp} \
@@ -32,13 +32,13 @@ rule trim_r2:
     params:
         mismatch = config["trim"]["mismatch"],
         fwd = rev_comp(config["trim"]["f_primer"]),
-        read_log = READ_LOG
+        read_fp = READ_DIR + "/{sample}_R2.fastq"
     output:
         trim_fp = PRIMER_TRIM_FP + "/{sample}_R2_trimmed.fastq",
         log_fp = PRIMER_TRIM_FP + "/{sample}_R2_trimmed.log"
     shell:
         """
-        wc -l {input} | awk '{{x=$1/4; print x"\t"$2}}' >> {params.read_log}
+        wc -l {input} | awk '{{x=$1/4; print x"\t"$2}}' > {params.read_fp}
         remove_primers.py {params.fwd} \
           -i {input} \
           -o {output.trim_fp} \
@@ -52,14 +52,15 @@ rule clean:
     output:
         expand(PRIMER_TRIM_FP + "/{{sample}}_{direction}_cleaned.fastq", direction = ["R1", "R2"])
     params:
-        READ_LOG
+        trimmed_reads = READ_DIR + "/{sample}_reads_trimmed.txt",
+        cleaned_reads = READ_DIR + "/{sample}_reads_cleaned.txt"
     shell:
         """
-        wc -l {input} | awk '{{x=$1/4; print x"\t"$2}}' | awk 'NR > 1 {{print y}}{{y = $0}}' >> {params}
+        wc -l {input} | awk '{{x=$1/4; print x"\t"$2}}' | awk 'NR > 1 {{print y}}{{y = $0}}' > {params.trimmed_reads}
         touch {output} && \
         filter_paired_fastq.py --min_length 50 {input} {output} && \
         rm {input}
-        wc -l {output} | awk '{{x=$1/4; print x"\t"$2}}' | awk 'NR > 1 {{print y}}{{y = $0}}' >> {params}
+        wc -l {output} | awk '{{x=$1/4; print x"\t"$2}}' | awk 'NR > 1 {{print y}}{{y = $0}}' > {params.cleaned_reads}
         """
 
 rule make_primer_db:
@@ -89,18 +90,18 @@ rule fasta:
         V_TRIM_FP + "/{sample}_{direction}.fasta"
     params:
         cleaned = PRIMER_TRIM_FP + "/{sample}_{direction}_cleaned.fastq",
-        read_log = READ_LOG
+        read_fp = READ_DIR + "/{sample}_{direction}.fasta"
     run:
         if get_lines(params[0]) > 0:
             shell("""
             module load seqtk && \
             seqtk seq -a {params.cleaned} > {output}
-            wc -l {output} | awk '{{x=$1/2; print x"\t"$2}}' >> {params.read_log}
+            wc -l {output} | awk '{{x=$1/2; print x"\t"$2}}' > {params.read_fp}
             """)
         else:
             shell("""
             echo ">1" > {output}
-            wc -l {output} | awk '{{x=$1/2; print x"\t"$2}}' >> {params.read_log}
+            wc -l {output} | awk '{{x=$1-1; print x"\t"$2}}' > {params.read_fp}
             """)
 
 rule vsearch_primers:
@@ -149,7 +150,7 @@ rule vsearch_trim:
         V_TRIM_FP + "/{sample}_{direction}_vsearch_trimmed.fastq"
     params:
         cleaned = PRIMER_TRIM_FP + "/{sample}_{direction}_cleaned.fastq",
-        read_log = READ_LOG,
+        read_log = READ_DIR + "/{sample}_{direction}_vsearch_trimmed.fastq",
         primers = V_TRIM_FP + "/{sample}_{direction}_reads_w_primers.txt"
     shell:
         """
@@ -171,7 +172,8 @@ rule vsearch_pair:
     params:
         header_R1 = V_TRIM_FP + "/{sample}_R1_headers.txt",
         header_R2 = V_TRIM_FP + "/{sample}_R2_headers.txt",
-        read_log = READ_LOG
+        read_log_R1 = READ_DIR + "/{sample}_R1_paired.txt",
+        read_log_R2 = READ_DIR + "/{sample}_R2_paired.txt",
     shell:
         """
         awk 'NR % 4 == 1' {input.R1} | cut -f1 -d' ' | cut -c 2- > {params.header_R1} && \
@@ -182,8 +184,8 @@ rule vsearch_pair:
         seqkit grep --pattern-file {params.header_R2} {input.R1} > {output.R1}
         rm {input.R1}
         rm {input.R2}
-        wc -l {output.R1} | awk '{{x=$1/4; print x"\t"$2}}' >> {params.read_log}
-        wc -l {output.R2} | awk '{{x=$1/4; print x"\t"$2}}' >> {params.read_log}
+        wc -l {output.R1} | awk '{{x=$1/4; print x"\t"$2}}' > {params.read_log_R1}
+        wc -l {output.R2} | awk '{{x=$1/4; print x"\t"$2}}' > {params.read_log_R2}
         """
 
 rule gzip_demux:
@@ -196,4 +198,16 @@ rule gzip_demux:
         touch {output} && \
         gzip -c {input} > {output} && \
         rm {input}
+        """
+
+rule read_report:
+    input:
+        expand(TRIM_DIR + "/{sample}_{direction}_vsearch_trimmed.fastq.gz", sample = SAMPLE_IDS, direction = ["R1", "R2"])
+    output:
+        READ_DIR + "/reads.log"
+    params:
+        READ_DIR + "/*"
+    shell:
+        """
+        cat {params} > {output}
         """

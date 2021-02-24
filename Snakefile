@@ -8,11 +8,11 @@ DEMUX_DIR = PROJECT_DIR + "/" + config["all"]["demux_dir"]
 PRIMER_TRIM_FP = PROJECT_DIR + "/primer_trim"
 V_TRIM_FP = PROJECT_DIR + "/vsearch_trim"
 TRIM_DIR = PROJECT_DIR + "/final_trim"
+READ_DIR = PROJECT_DIR + "/reads"
 PIPITS_DIR = PROJECT_DIR + "/PIPITS_output"
 BL_BR_DIR = PROJECT_DIR + "/BLAST_BROCC_output"
 MAPPING_FP = PROJECT_DIR + "/" + config["all"]["mapping_file"]
 SAMPLE_IDS = util_functions.get_sample(MAPPING_FP)
-READ_LOG = PROJECT_DIR + "/reads.log"
 
 include: "rules/targets.rules"
 include: "rules/PIPITS.rules"
