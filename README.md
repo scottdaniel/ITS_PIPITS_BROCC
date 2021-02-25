@@ -46,6 +46,7 @@ To run the pipeline, we need
   - **trim: f_primer**: Sequence of forward primer used for ITS PCR
   - **trim: r_primer**: Sequence of reverse primer used for ITS PCR
   - **trim: mismatch**: Number of allowable basepair mismatches on ITS PCR primers for trimming
+  - **trim: min_length**: Minimum length of primer to trim from reads
 - To run the pipeline, activate the environment by entering `conda activate ITS_PIPITS_BROCC`, `cd` into the project directory and execute:
 ```bash
 snakemake \
