@@ -18,3 +18,4 @@ trim:
   f_primer: CTTGGTCATTTAGAGGAAGTAA
   r_primer: GCTGCGTTCTTCATCGATGC
   mismatch: 2
+  min_length: 15

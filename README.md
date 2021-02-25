@@ -17,7 +17,7 @@ conda install --name ITS_PIPITS_BROCC --file requirements.txt
 
 - The following software also need to be installed:
   - `dnabc` (https://github.com/PennChopMicrobiomeProgram/dnabc)
-  - `ITS_primer_trim` (https://github.com/junglee0713/ITS_primer_trim)
+  - `ITS_primer_trim` (https://github.com/PennChopMicrobiomeProgram/Primer_trim)
   - To install (dnabc as example):
   ```bash
   git clone https://github.com/PennChopMicrobiomeProgram/dnabc

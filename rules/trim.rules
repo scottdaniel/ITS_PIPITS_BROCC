@@ -2,20 +2,17 @@ rule all_trim:
     input:
         TARGET_TRIM + TARGET_REPORT
 
-def rev_comp(dna):
-    complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'}
-    return ''.join([complement[base] for base in dna[::-1]])
-
-rule trim_r1:
+rule trim_r1_r:
     input:
         DEMUX_DIR + "/{sample}_R1.fastq"
     params:
         mismatch = config["trim"]["mismatch"],
-        rev = rev_comp(config["trim"]["r_primer"]),
+        rev = config["trim"]["r_primer"],
+        min_length = config["trim"]["min_length"],
         read_fp = READ_DIR + "/{sample}_R1.fastq"
     output:
-        trim_fp = PRIMER_TRIM_FP + "/{sample}_R1_trimmed.fastq",
-        log_fp = PRIMER_TRIM_FP + "/{sample}_R1_trimmed.log"
+        trim_fp = PRIMER_TRIM_FP + "/{sample}_R1_r_trimmed.fastq",
+        log_fp = PRIMER_TRIM_FP + "/{sample}_R1_r_trimmed.log"
     shell:
         """
         wc -l {input} | awk '{{x=$1/4; print x"\t"$2}}' > {params.read_fp}
@@ -23,19 +20,43 @@ rule trim_r1:
           -i {input} \
           -o {output.trim_fp} \
           --log {output.log_fp} \
-          --num_mismatches {params.mismatch}
+          --num_mismatches {params.mismatch} \
+          --min_length {params.min_length} \
+          --rev_comp
         """
 
-rule trim_r2:
+rule trim_r1_f:
+    input:
+        PRIMER_TRIM_FP + "/{sample}_R1_r_trimmed.fastq"
+    params:
+        mismatch = config["trim"]["mismatch"],
+        fwd = config["trim"]["f_primer"],
+        min_length = config["trim"]["min_length"]
+    output:
+        trim_fp = PRIMER_TRIM_FP + "/{sample}_R1_rf_trimmed.fastq",
+        log_fp = PRIMER_TRIM_FP + "/{sample}_R1_rf_trimmed.log"
+    shell:
+        """
+        remove_primers.py {params.fwd} \
+          -i {input} \
+          -o {output.trim_fp} \
+          --log {output.log_fp} \
+          --num_mismatches {params.mismatch} \
+          --min_length {params.min_length} \
+          --rev_comp
+        """
+
+rule trim_r2_f:
     input:
         DEMUX_DIR + "/{sample}_R2.fastq"
     params:
         mismatch = config["trim"]["mismatch"],
-        fwd = rev_comp(config["trim"]["f_primer"]),
+        fwd = config["trim"]["f_primer"],
+        min_length = config["trim"]["min_length"],
         read_fp = READ_DIR + "/{sample}_R2.fastq"
     output:
-        trim_fp = PRIMER_TRIM_FP + "/{sample}_R2_trimmed.fastq",
-        log_fp = PRIMER_TRIM_FP + "/{sample}_R2_trimmed.log"
+        trim_fp = PRIMER_TRIM_FP + "/{sample}_R2_f_trimmed.fastq",
+        log_fp = PRIMER_TRIM_FP + "/{sample}_R2_f_trimmed.log"
     shell:
         """
         wc -l {input} | awk '{{x=$1/4; print x"\t"$2}}' > {params.read_fp}
@@ -43,12 +64,35 @@ rule trim_r2:
           -i {input} \
           -o {output.trim_fp} \
           --log {output.log_fp} \
-          --num_mismatches {params.mismatch}
+          --num_mismatches {params.mismatch} \
+          --min_length {params.min_length} \
+          --rev_comp
+        """
+
+rule trim_r2_r:
+    input:
+        PRIMER_TRIM_FP + "/{sample}_R2_f_trimmed.fastq"
+    params:
+        mismatch = config["trim"]["mismatch"],
+        rev = config["trim"]["r_primer"],
+        min_length = config["trim"]["min_length"]
+    output:
+        trim_fp = PRIMER_TRIM_FP + "/{sample}_R2_rf_trimmed.fastq",
+        log_fp = PRIMER_TRIM_FP + "/{sample}_R2_rf_trimmed.log"
+    shell:
+        """
+        remove_primers.py {params.rev} \
+          -i {input} \
+          -o {output.trim_fp} \
+          --log {output.log_fp} \
+          --num_mismatches {params.mismatch} \
+          --min_length {params.min_length} \
+          --rev_comp
         """
 
 rule clean:
     input:
-        expand(PRIMER_TRIM_FP + "/{{sample}}_{direction}_trimmed.fastq", direction = ["R1", "R2"])
+        expand(PRIMER_TRIM_FP + "/{{sample}}_{direction}_rf_trimmed.fastq", direction = ["R1", "R2"])
     output:
         expand(PRIMER_TRIM_FP + "/{{sample}}_{direction}_cleaned.fastq", direction = ["R1", "R2"])
     params:
@@ -66,7 +110,7 @@ rule clean:
 rule make_primer_db:
     input:
         cleaned_fp = expand(PRIMER_TRIM_FP + "/{sample}_{direction}_cleaned.fastq", sample = SAMPLE_IDS, direction = ["R1", "R2"]),
-        log_fp = expand(PRIMER_TRIM_FP + "/{sample}_{direction}_trimmed.log", sample = SAMPLE_IDS, direction = ["R1", "R2"])
+        log_fp = expand(PRIMER_TRIM_FP + "/{sample}_{direction}_rf_trimmed.log", sample = SAMPLE_IDS, direction = ["R1", "R2"])
     output:
         V_TRIM_FP + "/primer2trim.fasta"
     params:
@@ -85,7 +129,7 @@ rule fasta:
     input:
         primer_db = V_TRIM_FP + "/primer2trim.fasta",
         cleaned_fp = expand(PRIMER_TRIM_FP + "/{sample}_{direction}_cleaned.fastq", sample = SAMPLE_IDS, direction = ["R1", "R2"]),
-        log_fp = expand(PRIMER_TRIM_FP + "/{sample}_{direction}_trimmed.log", sample = SAMPLE_IDS, direction = ["R1", "R2"])
+        log_fp = expand(PRIMER_TRIM_FP + "/{sample}_{direction}_rf_trimmed.log", sample = SAMPLE_IDS, direction = ["R1", "R2"])
     output:
         V_TRIM_FP + "/{sample}_{direction}.fasta"
     params:
