@@ -4,23 +4,21 @@ rule all_PIPITS:
 
 rule createreadpairslist:
   input:
-    expand(DEMUX_DIR + "/{sample}_{direction}.fastq.gz", sample = SAMPLE_IDS, direction = ["R1", "R2"])
+    expand(TRIM_DIR + "/{sample}_{direction}_vsearch_trimmed.fastq.gz", sample = SAMPLE_IDS, direction = ["R1", "R2"])
   params:
-    dmx_dir = DEMUX_DIR,
-    pipits_dir = PIPITS_DIR
+    TRIM_DIR
   output:
     PIPITS_DIR + "/readpairslist.txt"
   shell:
     """
-    mkdir -p {params.pipits_dir} && \
-    pispino_createreadpairslist -i {params.dmx_dir} -o {output}
+    pispino_createreadpairslist -i {params} -o {output}
     """
 
 rule seqprep:
   input:
     PIPITS_DIR + "/readpairslist.txt"
   params:
-    dmx_dir = DEMUX_DIR,
+    trim_dir = TRIM_DIR,
     out_seqprep = PIPITS_DIR + "/out_seqprep"
   threads:
     config["all"]["threads"]
@@ -28,8 +26,7 @@ rule seqprep:
     PIPITS_DIR + "/out_seqprep/prepped.fasta"
   shell:
     """
-    mkdir -p {params} && \
-    pispino_seqprep -i {params.dmx_dir} -o {params.out_seqprep} -l {input} -t {threads}
+    pispino_seqprep -i {params.trim_dir} -o {params.out_seqprep} -l {input} -t {threads}
     """
 
 rule funits:
@@ -44,7 +41,6 @@ rule funits:
     PIPITS_DIR + "/out_funits/ITS.fasta"
   shell:
     """
-    mkdir -p {params.output_dir} && \
     pipits_funits -i {input} -o {params.output_dir} -t {threads} -x {params.its_subregion}
     """
 
@@ -59,6 +55,5 @@ rule process:
     PIPITS_DIR + "/out_process/repseqs.fasta"
   shell:
     """
-    mkdir -p {params} && \
     pipits_process -i {input} -o {params} -t {threads} --Xmx 4G
     """

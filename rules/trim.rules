@@ -1,0 +1,257 @@
+rule all_trim:
+    input:
+        TARGET_TRIM + TARGET_REPORT
+
+rule trim_r1_r:
+    input:
+        DEMUX_DIR + "/{sample}_R1.fastq"
+    params:
+        mismatch = config["trim"]["mismatch"],
+        rev = config["trim"]["r_primer"],
+        min_length = config["trim"]["min_length"],
+        read_fp = READ_DIR + "/{sample}_R1.fastq"
+    output:
+        trim_fp = PRIMER_TRIM_FP + "/{sample}_R1_r_trimmed.fastq",
+        log_fp = PRIMER_TRIM_FP + "/{sample}_R1_r_trimmed.log"
+    shell:
+        """
+        wc -l {input} | awk '{{x=$1/4; print x"\t"$2}}' > {params.read_fp}
+        remove_primers.py {params.rev} \
+          -i {input} \
+          -o {output.trim_fp} \
+          --log {output.log_fp} \
+          --num_mismatches {params.mismatch} \
+          --min_length {params.min_length} \
+          --rev_comp
+        """
+
+rule trim_r1_f:
+    input:
+        PRIMER_TRIM_FP + "/{sample}_R1_r_trimmed.fastq"
+    params:
+        mismatch = config["trim"]["mismatch"],
+        fwd = config["trim"]["f_primer"],
+        min_length = config["trim"]["min_length"]
+    output:
+        trim_fp = PRIMER_TRIM_FP + "/{sample}_R1_rf_trimmed.fastq",
+        log_fp = PRIMER_TRIM_FP + "/{sample}_R1_rf_trimmed.log"
+    shell:
+        """
+        remove_primers.py {params.fwd} \
+          -i {input} \
+          -o {output.trim_fp} \
+          --log {output.log_fp} \
+          --num_mismatches {params.mismatch} \
+          --min_length {params.min_length} \
+          --rev_comp
+        """
+
+rule trim_r2_f:
+    input:
+        DEMUX_DIR + "/{sample}_R2.fastq"
+    params:
+        mismatch = config["trim"]["mismatch"],
+        fwd = config["trim"]["f_primer"],
+        min_length = config["trim"]["min_length"],
+        read_fp = READ_DIR + "/{sample}_R2.fastq"
+    output:
+        trim_fp = PRIMER_TRIM_FP + "/{sample}_R2_f_trimmed.fastq",
+        log_fp = PRIMER_TRIM_FP + "/{sample}_R2_f_trimmed.log"
+    shell:
+        """
+        wc -l {input} | awk '{{x=$1/4; print x"\t"$2}}' > {params.read_fp}
+        remove_primers.py {params.fwd} \
+          -i {input} \
+          -o {output.trim_fp} \
+          --log {output.log_fp} \
+          --num_mismatches {params.mismatch} \
+          --min_length {params.min_length} \
+          --rev_comp
+        """
+
+rule trim_r2_r:
+    input:
+        PRIMER_TRIM_FP + "/{sample}_R2_f_trimmed.fastq"
+    params:
+        mismatch = config["trim"]["mismatch"],
+        rev = config["trim"]["r_primer"],
+        min_length = config["trim"]["min_length"]
+    output:
+        trim_fp = PRIMER_TRIM_FP + "/{sample}_R2_rf_trimmed.fastq",
+        log_fp = PRIMER_TRIM_FP + "/{sample}_R2_rf_trimmed.log"
+    shell:
+        """
+        remove_primers.py {params.rev} \
+          -i {input} \
+          -o {output.trim_fp} \
+          --log {output.log_fp} \
+          --num_mismatches {params.mismatch} \
+          --min_length {params.min_length} \
+          --rev_comp
+        """
+
+rule clean:
+    input:
+        expand(PRIMER_TRIM_FP + "/{{sample}}_{direction}_rf_trimmed.fastq", direction = ["R1", "R2"])
+    output:
+        expand(PRIMER_TRIM_FP + "/{{sample}}_{direction}_cleaned.fastq", direction = ["R1", "R2"])
+    params:
+        trimmed_reads = READ_DIR + "/{sample}_reads_trimmed.txt",
+        cleaned_reads = READ_DIR + "/{sample}_reads_cleaned.txt"
+    shell:
+        """
+        wc -l {input} | awk '{{x=$1/4; print x"\t"$2}}' | awk 'NR > 1 {{print y}}{{y = $0}}' > {params.trimmed_reads}
+        touch {output} && \
+        filter_paired_fastq.py --min_length 50 {input} {output} && \
+        rm {input}
+        wc -l {output} | awk '{{x=$1/4; print x"\t"$2}}' | awk 'NR > 1 {{print y}}{{y = $0}}' > {params.cleaned_reads}
+        """
+
+rule make_primer_db:
+    input:
+        cleaned_fp = expand(PRIMER_TRIM_FP + "/{sample}_{direction}_cleaned.fastq", sample = SAMPLE_IDS, direction = ["R1", "R2"]),
+        log_fp = expand(PRIMER_TRIM_FP + "/{sample}_{direction}_rf_trimmed.log", sample = SAMPLE_IDS, direction = ["R1", "R2"])
+    output:
+        V_TRIM_FP + "/primer2trim.fasta"
+    params:
+        fwd = config["trim"]["f_primer"],
+        rev = config["trim"]["r_primer"]
+    shell:
+        """
+        echo -e ">f_primer\n{params.fwd}\n>r_primer\n{params.rev}" > {output}
+        """
+
+def get_lines(fp):
+  with open(fp) as myfile:
+    return sum(1 for line in myfile)
+
+rule fasta:
+    input:
+        primer_db = V_TRIM_FP + "/primer2trim.fasta",
+        cleaned_fp = expand(PRIMER_TRIM_FP + "/{sample}_{direction}_cleaned.fastq", sample = SAMPLE_IDS, direction = ["R1", "R2"]),
+        log_fp = expand(PRIMER_TRIM_FP + "/{sample}_{direction}_rf_trimmed.log", sample = SAMPLE_IDS, direction = ["R1", "R2"])
+    output:
+        V_TRIM_FP + "/{sample}_{direction}.fasta"
+    params:
+        cleaned = PRIMER_TRIM_FP + "/{sample}_{direction}_cleaned.fastq",
+        read_fp = READ_DIR + "/{sample}_{direction}.fasta"
+    run:
+        if get_lines(params[0]) > 0:
+            shell("""
+            module load seqtk && \
+            seqtk seq -a {params.cleaned} > {output}
+            wc -l {output} | awk '{{x=$1/2; print x"\t"$2}}' > {params.read_fp}
+            """)
+        else:
+            shell("""
+            echo ">1" > {output}
+            wc -l {output} | awk '{{x=$1-1; print x"\t"$2}}' > {params.read_fp}
+            """)
+
+rule vsearch_primers:
+    input:
+        V_TRIM_FP + "/{sample}_{direction}.fasta"
+    output:
+        V_TRIM_FP + "/{sample}_{direction}_reads_w_primers.txt"
+    params:
+        primer_db = V_TRIM_FP + "/primer2trim.fasta"
+    shell:
+        """
+        vsearch \
+            --usearch_global {input} \
+            --minseqlength 10 \
+            --id 0.7 \
+            --wordlength 4 \
+            --strand both \
+            --maxaccepts 4 \
+            --minwordmatches 3 \
+            --top_hits_only \
+            --userfields query+target+qstrand+id+alnlen+mism+opens+qilo+qihi+aln \
+            --db {params} \
+            --userout {output} && \
+        rm {input}
+        """
+
+rule cut:
+    input:
+        V_TRIM_FP + "/{sample}_{direction}_reads_w_primers.txt"
+    output:
+        V_TRIM_FP + "/{sample}_{direction}_vsearch_ids.txt"
+    run:
+        if get_lines(input[0]) > 0:
+            shell("""
+            cut -f1 {input} > {output}
+            """)
+        else:
+            shell("""
+            echo "fake_line" > {output}
+            """)
+
+rule vsearch_trim:
+    input:
+        V_TRIM_FP + "/{sample}_{direction}_vsearch_ids.txt"
+    output:
+        V_TRIM_FP + "/{sample}_{direction}_vsearch_trimmed.fastq"
+    params:
+        cleaned = PRIMER_TRIM_FP + "/{sample}_{direction}_cleaned.fastq",
+        read_log = READ_DIR + "/{sample}_{direction}_vsearch_trimmed.fastq",
+        primers = V_TRIM_FP + "/{sample}_{direction}_reads_w_primers.txt"
+    shell:
+        """
+        touch {output} && \
+        seqkit grep --pattern-file {input} --invert-match {params.cleaned} > {output}
+        wc -l {output} | awk '{{x=$1/4; print x"\t"$2}}' >> {params.read_log} && \
+        rm {params.cleaned} && \
+        rm {input}
+        rm {params.primers}
+        """
+
+rule vsearch_pair:
+    input:
+        R1 = V_TRIM_FP + "/{sample}_R1_vsearch_trimmed.fastq",
+        R2 = V_TRIM_FP + "/{sample}_R2_vsearch_trimmed.fastq"
+    output:
+        R1 = TRIM_DIR + "/{sample}_R1_vsearch_trimmed_paired.fastq",
+        R2 = TRIM_DIR + "/{sample}_R2_vsearch_trimmed_paired.fastq",
+    params:
+        header_R1 = V_TRIM_FP + "/{sample}_R1_headers.txt",
+        header_R2 = V_TRIM_FP + "/{sample}_R2_headers.txt",
+        read_log_R1 = READ_DIR + "/{sample}_R1_paired.txt",
+        read_log_R2 = READ_DIR + "/{sample}_R2_paired.txt",
+    shell:
+        """
+        awk 'NR % 4 == 1' {input.R1} | cut -f1 -d' ' | cut -c 2- > {params.header_R1} && \
+        echo "fake_line" >> {params.header_R1}
+        awk 'NR % 4 == 1' {input.R2} | cut -f1 -d' ' | cut -c 2- > {params.header_R2} && \
+        echo "fake_line" >> {params.header_R2}
+        seqkit grep --pattern-file {params.header_R1} {input.R2} > {output.R2}
+        seqkit grep --pattern-file {params.header_R2} {input.R1} > {output.R1}
+        rm {input.R1}
+        rm {input.R2}
+        wc -l {output.R1} | awk '{{x=$1/4; print x"\t"$2}}' > {params.read_log_R1}
+        wc -l {output.R2} | awk '{{x=$1/4; print x"\t"$2}}' > {params.read_log_R2}
+        """
+
+rule gzip_demux:
+    input:
+        TRIM_DIR + "/{sample}_{direction}_vsearch_trimmed_paired.fastq"
+    output:
+        TRIM_DIR + "/{sample}_{direction}_vsearch_trimmed.fastq.gz"
+    shell:
+        """
+        touch {output} && \
+        gzip -c {input} > {output} && \
+        rm {input}
+        """
+
+rule read_report:
+    input:
+        expand(TRIM_DIR + "/{sample}_{direction}_vsearch_trimmed.fastq.gz", sample = SAMPLE_IDS, direction = ["R1", "R2"])
+    output:
+        READ_DIR + "/reads.log"
+    params:
+        READ_DIR + "/*"
+    shell:
+        """
+        cat {params} > {output}
+        """

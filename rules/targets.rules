@@ -1,11 +1,17 @@
-TARGET_DEMUX = expand(DEMUX_DIR + "/{sample}_{direction}.fastq.gz", sample = SAMPLE_IDS, direction = ["R1", "R2"])
+TARGET_DEMUX = expand(DEMUX_DIR + "/{sample}_{direction}.fastq", sample = SAMPLE_IDS, direction = ["R1", "R2"])
+
+TARGET_TRIM = [expand(TRIM_DIR + "/{sample}_{direction}_vsearch_trimmed.fastq.gz", sample = SAMPLE_IDS, direction = ["R1", "R2"])]
 
 TARGET_PIPITS = [str(PIPITS_DIR + "/out_process/repseqs.fasta")]
 
 TARGET_BL_BR = [str(BL_BR_DIR + "/out_brocc/brocc.log")]
 
+TARGET_REPORT = [str(READ_DIR) + "/reads.log"]
+
 TARGET_ALL = (
   TARGET_DEMUX +
+  TARGET_TRIM +
   TARGET_PIPITS +
-  TARGET_BL_BR
+  TARGET_BL_BR +
+  TARGET_REPORT
 )
