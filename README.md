@@ -56,6 +56,7 @@ snakemake \
     --notemp
 ```
 - When submitting jobs using `qsub`, you may run `qsub run_snakemake.bash config.yml`
+- You may use the `skeleton.Rmd` to create a basic bioinformatic report from the results
   
 ## Notes on BROCC
 `create_local_taxonomy_db.py` may be used to install a local taxonomy db for faster processing
