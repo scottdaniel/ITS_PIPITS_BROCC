@@ -1,11 +1,11 @@
 all:
-  project_dir: "/path/to/project_dir"
+  project_dir: "/scr1/users/danielsg/ITS_PIPITS_BROCC"
   ncbi_db: "/mnt/isilon/microbiome/analysis/biodata/blast/nt_20180816/nt"
   mux_dir: "multiplexed_fastq"
   demux_dir: "demultiplexed_fastq"
   threads: 4
-  ITS_subregion:
-  mapping_file: "/path/to/mapping/file"
+  ITS_subregion: "" #leave blank if you do not want pipits to try extracting ITS sequences (sometimes this leaves you with nothing!)
+  mapping_file: "davis_run_2_ITS_mapping_file.tsv" #relative to project_dir
 
 demux:
     mismatch: 0
