@@ -13,3 +13,5 @@ transfer*
 *.swp
 manifest.csv
 .DS_Store
+.Rproj.user
+ITS_PIPITS_BROCC.Rproj
