@@ -12,3 +12,4 @@ transfer*
 *.tsv
 *.swp
 manifest.csv
+.DS_Store
