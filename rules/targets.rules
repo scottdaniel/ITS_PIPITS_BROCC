@@ -8,10 +8,14 @@ TARGET_BL_BR = [str(BL_BR_DIR + "/out_brocc/brocc.log")]
 
 TARGET_REPORT = [str(READ_DIR) + "/reads.log"]
 
+TARGET_VSEARCH = [str(VSEARCH_DIR) + "/vsearch_report.tsv",
+                  str(VSEARCH_DIR) + "/vsearch.fasta"]
+
 TARGET_ALL = (
   TARGET_DEMUX +
   TARGET_TRIM +
   TARGET_PIPITS +
   TARGET_BL_BR +
-  TARGET_REPORT
+  TARGET_REPORT +
+  TARGET_VSEARCH
 )

@@ -6,6 +6,7 @@ all:
   threads: 4
   ITS_subregion: "" #leave blank if you do not want pipits to try extracting ITS sequences (sometimes this leaves you with nothing!)
   mapping_file: "mapping_file.tsv" #relative to project_dir
+  controls_file: "ITS_geneblocks_ordered.fasta" #relative to project_dir
 
 demux:
     mismatch: 0

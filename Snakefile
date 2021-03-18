@@ -13,12 +13,14 @@ PIPITS_DIR = PROJECT_DIR + "/PIPITS_output"
 BL_BR_DIR = PROJECT_DIR + "/BLAST_BROCC_output"
 MAPPING_FP = PROJECT_DIR + "/" + config["all"]["mapping_file"]
 SAMPLE_IDS = util_functions.get_sample(MAPPING_FP)
+VSEARCH_DIR = PROJECT_DIR + "/VSEARCH_output"
 
 include: "rules/targets.rules"
 include: "rules/PIPITS.rules"
 include: "rules/blast_n_brocc.rules"
 include: "rules/demux.rules"
 include: "rules/trim.rules"
+include: "rules/vsearch.rules"
 
 workdir: PROJECT_DIR
 
