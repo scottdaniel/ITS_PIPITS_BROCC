@@ -5,7 +5,7 @@ pipits_db/
 demux_files/
 logs/
 reads/
-scripts/__pycache__/
+*.pyc
 .snakemake/
 snakejob*
 transfer*
@@ -16,3 +16,4 @@ manifest.csv
 .Rproj.user
 ITS_PIPITS_BROCC.Rproj
 .Rhistory
+upload.log
