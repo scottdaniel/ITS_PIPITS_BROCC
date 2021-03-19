@@ -28,4 +28,4 @@ snakemake \
     --notemp \
     --printshellcmds \
     --cluster \
-    "qsub -cwd -j oe -r n -V -l h_vmem={cluster.h_vmem} -l mem_free={cluster.mem_free} -pe smp {threads}"
+    "qsub -cwd -j y -r n -V -l h_vmem={cluster.h_vmem} -l mem_free={cluster.mem_free} -pe smp {threads}"
