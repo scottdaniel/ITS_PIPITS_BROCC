@@ -19,14 +19,15 @@ rule seqprep:
     PIPITS_DIR + "/readpairslist.txt"
   params:
     trim_dir = TRIM_DIR,
-    out_seqprep = PIPITS_DIR + "/out_seqprep"
+    out_seqprep = PIPITS_DIR + "/out_seqprep",
+    forwardreadsonly = "--forwardreadsonly" if config["pipits"]["forward_reads_only"] else ""
   threads:
     config["all"]["threads"]
   output:
     PIPITS_DIR + "/out_seqprep/prepped.fasta"
   shell:
     """
-    pispino_seqprep -i {params.trim_dir} -o {params.out_seqprep} -l {input} -t {threads}
+    pispino_seqprep -i {params.trim_dir} -o {params.out_seqprep} -l {input} -t {threads} {params.forwardreadsonly}
     """
 
 rule funits:
@@ -34,7 +35,7 @@ rule funits:
     PIPITS_DIR + "/out_seqprep/prepped.fasta"
   params:
     output_dir = PIPITS_DIR + "/out_funits",
-    its_subregion = config["all"]["ITS_subregion"]
+    its_subregion = config["pipits"]["ITS_subregion"]
   threads:
     config["all"]["threads"]
   output:
@@ -46,7 +47,7 @@ rule funits:
 
 rule process:
   input:
-    PIPITS_DIR + "/out_funits/ITS.fasta" if config["all"]["ITS_subregion"] else PIPITS_DIR + "/out_seqprep/prepped.fasta"
+    PIPITS_DIR + "/out_funits/ITS.fasta" if config["pipits"]["ITS_subregion"] else PIPITS_DIR + "/out_seqprep/prepped.fasta"
   params:
     PIPITS_DIR + "/out_process"
   threads:

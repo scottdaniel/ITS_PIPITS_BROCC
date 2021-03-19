@@ -1,12 +1,16 @@
 all:
-  project_dir: "/my/project/directory"
+  project_dir: "/scr1/users/danielsg/ITS_PIPITS_BROCC"
   ncbi_db: "/mnt/isilon/microbiome/analysis/biodata/blast/nt_20180816/nt"
   mux_dir: "multiplexed_fastq"
   demux_dir: "demultiplexed_fastq"
   threads: 4
+  mapping_file: "davis_run_2_ITS_mapping_file.tsv" #relative to project_dir
+  controls_file: "ITS_geneblocks_pads_and_primers_removed.fasta" #relative to project_dir
+
+pipits:
   ITS_subregion: "" #leave blank if you do not want pipits to try extracting ITS sequences (sometimes this leaves you with nothing!)
-  mapping_file: "mapping_file.tsv" #relative to project_dir
-  controls_file: "ITS_geneblocks_ordered.fasta" #relative to project_dir
+  forward_reads_only: true #during pispino_seqprep it discards reads if they do not pair, this at least keeps the foward reads
+# TODO maybe find a way to keep all the reads: forward, reverse, and merged
 
 demux:
     mismatch: 0
@@ -17,3 +21,13 @@ trim:
   r_primer: GCTGCGTTCTTCATCGATGC
   mismatch: 2
   min_length: 15
+
+vsearch:
+  threads: 4
+  min_id: 0.8 #minimum identity for query-target match
+  weak_id: 0.5 #set lower than min-id and you will get some weaker matches too
+  userfields: "query+target+id2+alnlen+mism+gaps+qilo+qihi+tilo+tihi+qs+ts+qrow+trow" #fields for results file, see vsearch documentation for details
+  iddef: 2 #the way "identity" is calculated, see vsearch docs for details (it's equal to (matching columns) / (alignment length) excluding terminal gaps)
+  fasta_width: 0 #Width of alignment lines in fasta output, set to 0 to eliminate wrapping
+  maxaccepts: 1 #Maximum number of hits to accept before stopping the search Default is 1
+
