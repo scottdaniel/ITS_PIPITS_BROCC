@@ -1,8 +1,10 @@
 {
     "__default__" :
-    {
-        "h_vmem" : "8G",
-        "mem_free" : "6G",
-        "m_mem_free" : "5G"
-    }
+	{
+		"account" : "hpcusers",
+		"partition" : "defq",
+		"memcpu" : "4G",
+		"time" : "2:0:0",
+		"name" : "ITS"
+	}
 }
