@@ -23,6 +23,7 @@ fi
 CONFIG_FP=$1
 
 snakemake \
+    --nolock \
     --jobs 100 \
     --configfile ${CONFIG_FP} \
     --cluster-config cluster.json \
